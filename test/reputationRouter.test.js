@@ -47,9 +47,17 @@ describe("Verify", function(){
             iocHash,
             "0x"
         )
+
+        console.log("endpoint1Address: " + endpoint1Address)
+        console.log("addIoCSelector: " +  "0xeee20731")
+        console.log("iocHash: " + iocHash)
+        console.log("extraData: " + "0x")
         
         let shareholderSignature = await shareholder.signMessage(ethers.utils.arrayify(messageHashFromContract))
-        await reputationRouter.addIoC(iocHash, shareholderSignature)
+        console.log("shareholderSignature:")
+        console.log(shareholderSignature)
+        addIoC_tx = await reputationRouter.addIoC(iocHash, shareholderSignature)
+        console.log(addIoC_tx)
 
     })
 
@@ -73,7 +81,7 @@ describe("Verify", function(){
         reputationRouter = reputationRouter.connect(endpoint1)
 
         let iocHash = "0xf79a63dcec80ed75c82f36161f17b9c2f407860160383a7be0a0ee7962c527ae"
-        let iocData = "{ioc:i1}"
+        let iocData = "{ioc:91}"
         let iocDataHex = ethers.utils.toUtf8Bytes(iocData) // Uint8Array(8) [123, 105, 111,  99, 58,  57,  49, 125]
         let iocDataHexString = "0x" + Buffer.from(iocDataHex).toString('hex')   //0x7b696f633a39317d
         
