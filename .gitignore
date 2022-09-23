@@ -10,4 +10,7 @@ cache
 artifacts
 
 yarn.lock
-
+.vscode
+deploymentLog
+scripts/python3/config.py
+scripts/python3/venv
