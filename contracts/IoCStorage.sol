@@ -5,7 +5,7 @@ import "./ReputationRouter.sol";
 
 /**
  * @author Vakhtanh Chikhladze
- * @dev Storage, that store Indicator of Comprometations (IoC) on Solidity compatible blockchains
+ * @dev Storage, that store Indicator of Comprometations (IoCs) on Solidity compatible blockchains
  */
 contract IoCStorage {
 
@@ -53,18 +53,18 @@ contract IoCStorage {
     }
  
     function addIoC(bytes32 iocHash, address endpoint) public onlyReputationRouter {
-        IoCInfo memory _iocInfo;
+        IoCInfo storage _iocInfo = iocInfo[iocHash];
         require(_iocInfo.iocCreator == address(0), "IoCStorage: ioc exist");
         _iocInfo.iocCreator = endpoint;
-        iocInfo[iocHash] = _iocInfo;
         iocHashes.push(iocHash);
         emit AddIoC(endpoint, iocHash);
     }
 
     function reportIoC(bytes32 iocHash, address endpoint, bytes32 reportHash) public onlyReputationRouter {
         require(reports[iocHash][endpoint] == bytes32(0), "IoCStorage: ioc already reported");
-        reports[iocHash][endpoint] = reportHash;
         IoCInfo storage _iocInfo = iocInfo[iocHash];
+        require(_iocInfo.iocCreator != endpoint, "IoCStorage: ioc cant be reported by ioc creator");
+        reports[iocHash][endpoint] = reportHash;
         _iocInfo.reporters.push(endpoint);
         emit ReportIoC(endpoint, iocHash, reportHash);
     }

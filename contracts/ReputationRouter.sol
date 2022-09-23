@@ -146,6 +146,11 @@ contract ReputationRouter is IReputationRouter {
 
     /***** ENDPOINT FUNCTIONS *****/
 
+    /**
+     * @dev adds Indicator of Comprometation hash to storage.
+     * @param iocHash - 32 bytes of Indicator of Comprometation
+     * @param shareholderSignature - 65 bytes of signature
+     */
     function addIoC(bytes32 iocHash, bytes memory shareholderSignature) public override {
         require(
             verify(
@@ -227,8 +232,14 @@ contract ReputationRouter is IReputationRouter {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
     }
 
-    function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature) public pure returns (address) {
-        require(_signature.length == 65, "invalid signature length");
+    function getMessageHashWithEthSign(address endpoint, bytes4 selector, bytes32 iocHash, bytes memory extraData) public pure returns (bytes32) {
+        bytes32 messageHash = getMessageHash(endpoint, selector, iocHash, extraData);
+        bytes32 ethSignedMessage = getEthSignedMessageHash(messageHash);
+        return ethSignedMessage;
+    }
+
+    function recoverSigner(bytes32 ethSignedMessageHash, bytes memory signature) public pure returns (address) {
+        require(signature.length == 65, "invalid signature length");
         bytes32 r;
         bytes32 s;
         uint8 v;
@@ -243,13 +254,13 @@ contract ReputationRouter is IReputationRouter {
             */
 
             // first 32 bytes, after the length prefix
-            r := mload(add(_signature, 32))
+            r := mload(add(signature, 32))
             // second 32 bytes
-            s := mload(add(_signature, 64))
+            s := mload(add(signature, 64))
             // final byte (first byte of the next 32 bytes)
-            v := byte(0, mload(add(_signature, 96)))
+            v := byte(0, mload(add(signature, 96)))
         }
-        return ecrecover(_ethSignedMessageHash, v, r, s);
+        return ecrecover(ethSignedMessageHash, v, r, s);
     }
 
     /**
